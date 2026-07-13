@@ -1,23 +1,21 @@
-import { useSvgElement } from "../hooks/useSvgElement";
+/* eslint-disable import-x/no-unresolved */
 import type { SvgElementType } from "../hooks/useSvgElement";
+
+import { useSvgElement } from "../hooks/useSvgElement";
 import PropertyInput from "./ui/PropertyInput";
 
-const SHAPE_OPTIONS: ReadonlyArray<{
-  readonly value: SvgElementType;
+const SHAPE_OPTIONS: readonly {
   readonly label: string;
-}> = [
-  { value: "path", label: "Path (Caminho)" },
-  { value: "circle", label: "Circle (Círculo)" },
-  { value: "rect", label: "Rect (Retângulo)" },
-  { value: "ellipse", label: "Ellipse (Elipse)" },
+  readonly value: SvgElementType;
+}[] = [
+  { label: "Path (Caminho)", value: "path" },
+  { label: "Circle (Círculo)", value: "circle" },
+  { label: "Rect (Retângulo)", value: "rect" },
+  { label: "Ellipse (Elipse)", value: "ellipse" },
 ];
 
-function isSvgElementType(value: string): value is SvgElementType {
-  return value === "path" || value === "circle" || value === "rect" || value === "ellipse";
-}
-
 export default function Sidebar() {
-  const { element, updateField, setType } = useSvgElement();
+  const { element, setType, updateField } = useSvgElement();
 
   return (
     <aside className="w-72 h-full bg-panel-dark border-l border-border-dark p-4 flex flex-col gap-4 shadow-xl z-10 select-none shrink-0">
@@ -27,23 +25,23 @@ export default function Sidebar() {
         </h2>
       </div>
 
-      <form onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-4">
+      <form className="flex flex-col gap-4" onSubmit={(event) => event.preventDefault()}>
         <div className="flex flex-col gap-1.5">
           <label
-            htmlFor="svg_type"
             className="text-[11px] font-medium text-text-muted capitalize tracking-wide"
+            htmlFor="svg_type"
           >
             Tipo de Forma
           </label>
           <div className="relative">
             <select
+              className="w-full bg-panel-dark border border-border-dark rounded px-2.5 py-1.5 text-xs text-gray-200 outline-none cursor-pointer transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none"
               id="svg_type"
-              value={element.type}
               onChange={(event) => {
                 const value = event.target.value;
                 if (isSvgElementType(value)) setType(value);
               }}
-              className="w-full bg-panel-dark border border-border-dark rounded px-2.5 py-1.5 text-xs text-gray-200 outline-none cursor-pointer transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none"
+              value={element.type}
             >
               {SHAPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -62,35 +60,35 @@ export default function Sidebar() {
         <div className="grid grid-cols-2 gap-3">
           <PropertyInput
             id="fill"
-            type="color"
-            value={element.fill}
             label="Preenchimento"
             onChange={(value) => updateField("fill", String(value))}
+            type="color"
+            value={element.fill}
           />
           <PropertyInput
             id="stroke"
-            type="color"
-            value={element.stroke}
             label="Contorno"
             onChange={(value) => updateField("stroke", String(value))}
+            type="color"
+            value={element.stroke}
           />
         </div>
 
         <PropertyInput
           id="strokeWidth"
-          type="number"
-          value={element.strokeWidth}
           label="Espessura do Contorno"
           onChange={(value) => updateField("strokeWidth", Number(value))}
+          type="number"
+          value={element.strokeWidth}
         />
 
         {element.type === "path" && (
           <PropertyInput
             id="path"
-            type="textArea"
-            value={element.path}
             label="Dados do Caminho (d)"
             onChange={(value) => updateField("path", String(value))}
+            type="textArea"
+            value={element.path}
           />
         )}
 
@@ -98,31 +96,31 @@ export default function Sidebar() {
           <>
             <PropertyInput
               id="x"
-              type="number"
-              value={element.x}
               label="X"
               onChange={(value) => updateField("x", Number(value))}
+              type="number"
+              value={element.x}
             />
             <PropertyInput
               id="y"
-              type="number"
-              value={element.y}
               label="Y"
               onChange={(value) => updateField("y", Number(value))}
+              type="number"
+              value={element.y}
             />
             <PropertyInput
               id="width"
-              type="number"
-              value={element.width}
               label="Largura"
               onChange={(value) => updateField("width", Number(value))}
+              type="number"
+              value={element.width}
             />
             <PropertyInput
               id="height"
-              type="number"
-              value={element.height}
               label="Altura"
               onChange={(value) => updateField("height", Number(value))}
+              type="number"
+              value={element.height}
             />
           </>
         )}
@@ -131,17 +129,17 @@ export default function Sidebar() {
           <>
             <PropertyInput
               id="cx"
-              type="number"
-              value={element.cx}
               label="Centro X"
               onChange={(value) => updateField("cx", Number(value))}
+              type="number"
+              value={element.cx}
             />
             <PropertyInput
               id="cy"
-              type="number"
-              value={element.cy}
               label="Centro Y"
               onChange={(value) => updateField("cy", Number(value))}
+              type="number"
+              value={element.cy}
             />
           </>
         )}
@@ -149,10 +147,10 @@ export default function Sidebar() {
         {element.type === "circle" && (
           <PropertyInput
             id="r"
-            type="number"
-            value={element.r}
             label="Raio"
             onChange={(value) => updateField("r", Number(value))}
+            type="number"
+            value={element.r}
           />
         )}
 
@@ -160,21 +158,25 @@ export default function Sidebar() {
           <>
             <PropertyInput
               id="rx"
-              type="number"
-              value={element.rx}
               label="Raio X"
               onChange={(value) => updateField("rx", Number(value))}
+              type="number"
+              value={element.rx}
             />
             <PropertyInput
               id="ry"
-              type="number"
-              value={element.ry}
               label="Raio Y"
               onChange={(value) => updateField("ry", Number(value))}
+              type="number"
+              value={element.ry}
             />
           </>
         )}
       </form>
     </aside>
   );
+}
+
+function isSvgElementType(value: string): value is SvgElementType {
+  return value === "path" || value === "circle" || value === "rect" || value === "ellipse";
 }

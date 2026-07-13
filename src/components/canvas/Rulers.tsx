@@ -1,10 +1,45 @@
+/* eslint-disable import-x/no-unresolved */
 import { useMemo } from "react";
-import { useCanvas } from "../../hooks/useCanvasContext";
+
 import { GRID_SIZE, RULER_STROKE, RULER_THICKNESS } from "../../constants/canvas";
+import { useCanvas } from "../../hooks/useCanvasContext";
 import { getVisibleCanvasBounds, type Size } from "../../lib/geometry";
 
 interface RulersProps {
   readonly containerSize: Size;
+}
+
+export function Rulers({ containerSize }: RulersProps) {
+  const { viewport } = useCanvas();
+
+  const horizontalTicks = useMemo(
+    () => buildTicks("horizontal", containerSize, viewport, GRID_SIZE),
+    [containerSize, viewport],
+  );
+
+  const verticalTicks = useMemo(
+    () => buildTicks("vertical", containerSize, viewport, GRID_SIZE),
+    [containerSize, viewport],
+  );
+
+  if (containerSize.width === 0) return null;
+
+  return (
+    <>
+      <svg
+        className="absolute top-0 left-0 w-full  bg-slate-900 border-b border-slate-700 z-20 pointer-events-none"
+        style={{ height: RULER_THICKNESS }}
+      >
+        {horizontalTicks}
+      </svg>
+      <svg
+        className="absolute top-0 left-0 bg-slate-900 border-r border-slate-700 z-20 pointer-events-none"
+        style={{ height: containerSize.height, width: RULER_THICKNESS }}
+      >
+        {verticalTicks}
+      </svg>
+    </>
+  );
 }
 
 function buildTicks(
@@ -36,20 +71,20 @@ function buildTicks(
         }
       >
         <line
-          x1="0"
-          y1="0"
-          x2={orientation === "horizontal" ? "0" : String(RULER_THICKNESS)}
-          y2={orientation === "horizontal" ? String(RULER_THICKNESS) : "0"}
           stroke={RULER_STROKE}
           strokeWidth="1"
+          x1="0"
+          x2={orientation === "horizontal" ? "0" : String(RULER_THICKNESS)}
+          y1="0"
+          y2={orientation === "horizontal" ? String(RULER_THICKNESS) : "0"}
         />
         <text
+          className="select-none pointer-events-none"
+          fill={RULER_STROKE}
+          fontSize="10"
+          transform={orientation === "vertical" ? "rotate(-90 2 12)" : undefined}
           x={orientation === "vertical" ? -10 : 5}
           y={orientation === "vertical" ? 25 : 15}
-          fontSize="10"
-          fill={RULER_STROKE}
-          className="select-none pointer-events-none"
-          transform={orientation === "vertical" ? "rotate(-90 2 12)" : undefined}
         >
           {value}
         </text>
@@ -58,37 +93,4 @@ function buildTicks(
   }
 
   return ticks;
-}
-
-export function Rulers({ containerSize }: RulersProps) {
-  const { viewport } = useCanvas();
-
-  const horizontalTicks = useMemo(
-    () => buildTicks("horizontal", containerSize, viewport, GRID_SIZE),
-    [containerSize, viewport],
-  );
-
-  const verticalTicks = useMemo(
-    () => buildTicks("vertical", containerSize, viewport, GRID_SIZE),
-    [containerSize, viewport],
-  );
-
-  if (containerSize.width === 0) return null;
-
-  return (
-    <>
-      <svg
-        className="absolute top-0 left-0 w-full  bg-slate-900 border-b border-slate-700 z-20 pointer-events-none"
-        style={{ height: RULER_THICKNESS }}
-      >
-        {horizontalTicks}
-      </svg>
-      <svg
-        className="absolute top-0 left-0 bg-slate-900 border-r border-slate-700 z-20 pointer-events-none"
-        style={{ width: RULER_THICKNESS, height: containerSize.height }}
-      >
-        {verticalTicks}
-      </svg>
-    </>
-  );
 }

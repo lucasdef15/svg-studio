@@ -12,6 +12,22 @@ import { createDefaultElement } from "../lib/element-defaults";
 
 export type SvgElementType = "path" | "circle" | "rect" | "ellipse";
 
+type SvgElementProps = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  cx: number;
+  cy: number;
+  r: number;
+  rx: number;
+  ry: number;
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  path: string;
+};
+
 export type BaseSvgElement = {
   readonly type: SvgElementType;
   readonly fill: string;
@@ -47,40 +63,23 @@ export type RectElement = BaseSvgElement & {
   readonly height: number;
 };
 
-export type SvgElement =
-  | PathElement
-  | CircleElement
-  | EllipseElement
-  | RectElement;
+export type SvgElement = PathElement | CircleElement | EllipseElement | RectElement;
 
-type ElementPatch = Partial<
-  Omit<SvgElement, "type"> & Record<string, string | number>
->;
+type ElementPatch = Partial<Omit<SvgElement, "type"> & Record<string, string | number>>;
 
 interface SvgElementContextValue {
   readonly element: SvgElement;
   readonly setElement: Dispatch<SetStateAction<SvgElement>>;
 }
 
-const SvgElementContext = createContext<SvgElementContextValue | undefined>(
-  undefined,
-);
+const SvgElementContext = createContext<SvgElementContextValue | undefined>(undefined);
 
 export function SvgElementProvider({ children }: { children: ReactNode }) {
-  const [element, setElement] = useState<SvgElement>(() =>
-    createDefaultElement("rect"),
-  );
+  const [element, setElement] = useState<SvgElement>(() => createDefaultElement("rect"));
 
-  const value = useMemo(
-    () => ({ element, setElement }),
-    [element],
-  );
+  const value = useMemo(() => ({ element, setElement }), [element]);
 
-  return (
-    <SvgElementContext.Provider value={value}>
-      {children}
-    </SvgElementContext.Provider>
-  );
+  return <SvgElementContext.Provider value={value}>{children}</SvgElementContext.Provider>;
 }
 
 export function useSvgElement() {
@@ -112,12 +111,12 @@ export function useSvgElement() {
     [setElement],
   );
 
-  const updateField = useCallback(
-    <K extends keyof SvgElement>(key: K, value: SvgElement[K]) => {
-      setElement((prev) => ({ ...prev, [key]: value }) as SvgElement);
-    },
-    [setElement],
-  );
+  const updateField = <k extends keyof SvgElementProps>(key: k, value: SvgElementProps[k]) => {
+    setElement((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   return {
     element,

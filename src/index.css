@@ -1,21 +1,24 @@
 @import "tailwindcss";
 
-/* Configurações de tema exclusivas do Tailwind v4 */
 @theme {
   --color-panel-dark: #21252b;
   --color-border-dark: #3e4451;
   --color-text-muted: #9da5b4;
 }
 
-/* Customizações globais para o seu Studio SVG */
 @layer base {
   body {
-    background-color: #1e1e24; /* Fundo geral simulando o VS Code */
+    background-color: #1e1e24;
     color: #abb2bf;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
   }
 
-  /* Reset e comportamento para o input color funcionar perfeitamente com classes do Tailwind */
   input[type="color"] {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -24,13 +27,12 @@
     box-sizing: border-box;
   }
 
-  /* Força a pastilha interna de cor a preencher o input inteiro */
   input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0;
     width: 100%;
     height: 100%;
   }
-  
+
   input[type="color"]::-webkit-color-swatch {
     border: 1px solid var(--color-border-dark);
     border-radius: 2px;

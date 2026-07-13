@@ -24,21 +24,36 @@ const HANDLE_POSITIONS: ReadonlyArray<{
 
 interface SelectionOverlayProps {
   readonly element: SvgElement;
-  readonly onResizeStart: (
-    handle: ResizeHandleId,
-    event: MouseEvent<SVGRectElement>,
-  ) => void;
+  readonly onResizeStart: (handle: ResizeHandleId, event: MouseEvent<SVGRectElement>) => void;
 }
 
-export function SelectionOverlay({
-  element,
-  onResizeStart,
-}: SelectionOverlayProps) {
+/**
+ * ============================================================================
+ * SELECTION OVERLAY
+ * ============================================================================
+ *
+ * Responsável por desenhar a camada de seleção do elemento atualmente ativo.
+ *
+ * Este componente NÃO realiza o redimensionamento do elemento.
+ * Sua responsabilidade é apenas:
+ *
+ * - Calcular o Bounding Box do elemento selecionado;
+ * - Desenhar o contorno da seleção;
+ * - Renderizar os Handles (alças) de redimensionamento;
+ * - Detectar quando um Handle é pressionado;
+ * - Informar ao componente pai qual Handle iniciou o Resize.
+ *
+ * A lógica de redimensionamento fica no CanvasViewport.
+ */
+export function SelectionOverlay({ element, onResizeStart }: SelectionOverlayProps) {
   const { viewport } = useCanvas();
+  // Calcula o retângulo que envolve o elemento selecionado.
   const bounds = getElementBounds(element);
 
   if (!bounds) return null;
 
+  // Mantém o tamanho dos Handles e da borda constante,
+  // independentemente do nível de Zoom.
   const handleSize = HANDLE_SIZE / viewport.zoom;
   const handleOffset = HANDLE_OFFSET / viewport.zoom;
   const strokeWidth = 1 / viewport.zoom;

@@ -1,3 +1,5 @@
+/* eslint-disable import-x/no-unresolved */
+
 import PathEditor from "./components/PathEditor";
 import Sidebar from "./components/sidebar";
 

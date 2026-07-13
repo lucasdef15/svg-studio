@@ -1,12 +1,16 @@
+/* eslint-disable import-x/no-unresolved */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { SvgElementProvider } from "./hooks/useSvgElement";
-import "./index.css";
 import App from "./App";
+import "./index.css";
 import { CanvasProvider } from "./hooks/useCanvasContext";
+import { SvgElementProvider } from "./hooks/useSvgElement";
 
-createRoot(document.getElementById("root")!).render(
+const container = document.getElementById("root");
+if (!container) throw new Error("Root element not found");
+
+createRoot(container).render(
   <StrictMode>
     <CanvasProvider>
       <SvgElementProvider>

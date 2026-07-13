@@ -1,38 +1,41 @@
+/* eslint-disable import-x/no-unresolved */
 import {
+  type MouseEvent,
+  type ReactNode,
   useEffect,
   useRef,
   useState,
-  type MouseEvent,
-  type ReactNode,
   type WheelEvent,
 } from "react";
+
+import type { Point } from "../../lib/geometry";
+
+import { ZOOM_WHEEL_SPEED } from "../../constants/canvas";
 import { useCanvas } from "../../hooks/useCanvasContext";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { useSpaceKey } from "../../hooks/useSpaceKey";
 import { useSvgElement } from "../../hooks/useSvgElement";
-import { ZOOM_WHEEL_SPEED } from "../../constants/canvas";
-import type { Point } from "../../lib/geometry";
-import { Rulers } from "./Rulers";
-import { Grid } from "./Grid";
-import { Crosshair } from "./Crosshair";
 import { CoordinateDisplay } from "./CoordinateDisplay";
-import { SelectionOverlay, type ResizeHandleId } from "./SelectionOverlay";
+import { Crosshair } from "./Crosshair";
+import { Grid } from "./Grid";
+import { Rulers } from "./Rulers";
+import { type ResizeHandleId, SelectionOverlay } from "./SelectionOverlay";
 
 interface CanvasViewportProps {
   readonly children: ReactNode;
 }
 
-type InteractionMode = "idle" | "panning" | "dragging" | "resizing";
+type InteractionMode = "dragging" | "idle" | "panning" | "resizing";
 
 interface ResizeState {
   readonly handle: ResizeHandleId;
-  readonly startCanvas: Point;
   readonly initial: {
+    readonly height: number;
+    readonly width: number;
     readonly x: number;
     readonly y: number;
-    readonly width: number;
-    readonly height: number;
   };
+  readonly startCanvas: Point;
 }
 
 export function CanvasViewport({ children }: CanvasViewportProps) {
@@ -87,15 +90,15 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
   }, []);
 
   const {
-    viewport,
-    setViewport,
-    showGrid,
-    setShowGrid,
-    mousePos,
-    setMousePos,
-    screenToCanvas,
     applySnap,
     clampZoom,
+    screenToCanvas,
+    // mousePos,
+    setMousePos,
+    setShowGrid,
+    setViewport,
+    showGrid,
+    viewport,
   } = useCanvas();
 
   const { element, patch } = useSvgElement();
@@ -125,7 +128,7 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
    */
   const [mode, setMode] = useState<InteractionMode>("idle");
   const [dragAnchor, setDragAnchor] = useState<Point>({ x: 0, y: 0 });
-  const [resizeState, setResizeState] = useState<ResizeState | null>(null);
+  const [resizeState, setResizeState] = useState<null | ResizeState>(null);
 
   /**
    * ============================================================================
@@ -249,13 +252,13 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
     setMode("resizing");
     setResizeState({
       handle,
-      startCanvas: getCanvasPoint(event),
       initial: {
+        height: element.height,
+        width: element.width,
         x: element.x,
         y: element.y,
-        width: element.width,
-        height: element.height,
       },
+      startCanvas: getCanvasPoint(event),
     });
   };
   /**
@@ -304,10 +307,10 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
     }
 
     patch({
+      height: applySnap(Math.max(height, 1)),
+      width: applySnap(Math.max(width, 1)),
       x: applySnap(x),
       y: applySnap(y),
-      width: applySnap(Math.max(width, 1)),
-      height: applySnap(Math.max(height, 1)),
     });
   };
   /**
@@ -433,21 +436,21 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
    */
   return (
     <div
-      ref={containerRef}
       className={`relative flex-1 min-h-0 w-full bg-slate-950 overflow-hidden border border-slate-800 rounded-lg shadow-2xl ${cursorClass}`}
-      onWheel={handleWheel}
       onMouseDown={handleMouseDown}
+      onMouseLeave={handleMouseUp}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onWheel={handleWheel}
+      ref={containerRef}
     >
       <Rulers containerSize={containerSize} />
       <CoordinateDisplay />
 
       <button
-        type="button"
-        onClick={() => setShowGrid((prev) => !prev)}
         className="absolute bottom-4 left-10 bg-slate-900/80 text-slate-300 px-3 py-1 rounded text-xs z-30 border border-slate-700 hover:bg-slate-800"
+        onClick={() => setShowGrid((prev) => !prev)}
+        type="button"
       >
         Grid: {showGrid ? "ON" : "OFF"}
       </button>

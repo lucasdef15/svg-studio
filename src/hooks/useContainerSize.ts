@@ -1,11 +1,10 @@
-import { useEffect, useState, type RefObject } from "react";
+import { type RefObject, useEffect, useState } from "react";
+
 import type { Size } from "../lib/geometry";
 
-const INITIAL_SIZE: Size = { width: 0, height: 0 };
+const INITIAL_SIZE: Size = { height: 0, width: 0 };
 
-export function useContainerSize(
-  ref: RefObject<HTMLElement | null>,
-): Size {
+export function useContainerSize(ref: RefObject<HTMLElement | null>): Size {
   const [size, setSize] = useState<Size>(INITIAL_SIZE);
 
   useEffect(() => {
@@ -15,14 +14,14 @@ export function useContainerSize(
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) return;
-      const { width, height } = entry.contentRect;
-      setSize({ width, height });
+      const { height, width } = entry.contentRect;
+      setSize({ height, width });
     });
 
     observer.observe(element);
     setSize({
-      width: element.clientWidth,
       height: element.clientHeight,
+      width: element.clientWidth,
     });
 
     return () => observer.disconnect();

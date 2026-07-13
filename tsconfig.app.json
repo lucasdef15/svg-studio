@@ -10,13 +10,15 @@
 
     "types": ["vite/client"],
 
-    "noEmit": true,
-
     "strict": true,
 
     "noImplicitOverride": true,
 
     "noImplicitReturns": true,
+
+    "allowSyntheticDefaultImports": true,
+
+    "resolveJsonModule": true,
 
     "noUncheckedIndexedAccess": true,
 

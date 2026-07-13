@@ -1,3 +1,4 @@
+/* eslint-disable import-x/no-unresolved */
 import { useSvgElement } from "../hooks/useSvgElement";
 import { CanvasViewport } from "./canvas/CanvasViewport";
 import { SvgShape } from "./SvgShape";

@@ -1,45 +1,69 @@
+import { defineConfig, globalIgnores } from "eslint/config";
+
 import js from "@eslint/js";
-import json from "@eslint/json";
+import prettier from "eslint-config-prettier";
 import globals from "globals";
-import react from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import tailwind from "eslint-plugin-tailwindcss";
+import tseslint from "typescript-eslint";
+
 import importX from "eslint-plugin-import-x";
 import perfectionist from "eslint-plugin-perfectionist";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
 import unusedImports from "eslint-plugin-unused-imports";
-import tseslint from "typescript-eslint";
-import { defineConfig, globalIgnores } from "eslint/config";
-import prettier from "eslint-config-prettier";
 
 export default defineConfig([
   globalIgnores([
     "dist",
-    "node_modules",
     "coverage",
+    "node_modules",
+    ".vite",
+    ".turbo",
     "*.config.js",
     "*.config.ts",
   ]),
 
+  // ============================================================================
+  // JavaScript
+  // ============================================================================
+
   js.configs.recommended,
 
-  ...tseslint.configs.recommended,
-
-  react.configs.flat.recommended,
-
-  reactHooks.configs.flat.recommended,
-
-  reactRefresh.configs.vite,
-
-  ...tailwind.configs["flat/recommended"],
+  // ============================================================================
+  // TypeScript
+  // ============================================================================
 
   ...tseslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
 
+  // ============================================================================
+  // React
+  // ============================================================================
+
+  reactHooks.configs.flat.recommended,
+  reactRefresh.configs.vite,
+
+  // ============================================================================
+  // Imports
+  // ============================================================================
+
   importX.flatConfigs.recommended,
 
+  // ============================================================================
+  // Organização
+  // ============================================================================
+
   perfectionist.configs["recommended-natural"],
+
+  // ============================================================================
+  // Prettier
+  // ============================================================================
+
+  prettier,
+
+  // ============================================================================
+  // Projeto
+  // ============================================================================
 
   {
     files: ["**/*.{ts,tsx}"],
@@ -50,12 +74,9 @@ export default defineConfig([
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-      },
-    },
-
-    settings: {
-      react: {
-        version: "detect",
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
 
@@ -64,15 +85,9 @@ export default defineConfig([
     },
 
     rules: {
-      /*
-       * React
-       */
-
-      "react/react-in-jsx-scope": "off",
-
-      /*
-       * React Refresh
-       */
+      // ==========================================================================
+      // React Refresh
+      // ==========================================================================
 
       "react-refresh/only-export-components": [
         "warn",
@@ -81,9 +96,9 @@ export default defineConfig([
         },
       ],
 
-      /*
-       * Imports
-       */
+      // ==========================================================================
+      // Unused Imports
+      // ==========================================================================
 
       "unused-imports/no-unused-imports": "error",
 
@@ -97,17 +112,17 @@ export default defineConfig([
         },
       ],
 
-      /*
-       * import-x
-       */
+      // ==========================================================================
+      // Import-X
+      // ==========================================================================
 
       "import-x/first": "error",
       "import-x/newline-after-import": "error",
       "import-x/no-duplicates": "error",
 
-      /*
-       * Perfectionist
-       */
+      // ==========================================================================
+      // Perfectionist
+      // ==========================================================================
 
       "perfectionist/sort-imports": [
         "error",
@@ -141,24 +156,8 @@ export default defineConfig([
         },
       ],
 
-      /*
-       * Tailwind
-       */
-
-      "tailwindcss/classnames-order": "warn",
-      "tailwindcss/no-custom-classname": "off",
+      "perfectionist/sort-interfaces": "warn",
+      "perfectionist/sort-union-types": "warn",
     },
-  },
-
-  {
-    files: ["**/*.json"],
-
-    plugins: {
-      json,
-    },
-
-    language: "json/json",
-
-    extends: ["json/recommended"],
   },
 ]);

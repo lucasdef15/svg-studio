@@ -1,20 +1,18 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable import-x/no-unresolved */
 import {
   createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
   useCallback,
   useContext,
   useMemo,
   useState,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
 } from "react";
-import {
-  GRID_SIZE,
-  GRID_SUBDIVISIONS,
-  ZOOM_MIN,
-  ZOOM_MAX,
-} from "../constants/canvas";
-import { screenToCanvas, snapToGrid, type Point } from "../lib/geometry";
+
+import { GRID_SIZE, GRID_SUBDIVISIONS, ZOOM_MAX, ZOOM_MIN } from "../constants/canvas";
+import { type Point, screenToCanvas, snapToGrid } from "../lib/geometry";
 
 export interface Viewport {
   readonly x: number;
@@ -23,26 +21,22 @@ export interface Viewport {
 }
 
 interface CanvasContextValue {
-  readonly viewport: Viewport;
-  readonly setViewport: Dispatch<SetStateAction<Viewport>>;
-  readonly showGrid: boolean;
-  readonly setShowGrid: Dispatch<SetStateAction<boolean>>;
-  readonly snapToGrid: boolean;
-  readonly setSnapToGrid: Dispatch<SetStateAction<boolean>>;
-  readonly mousePos: Point;
-  readonly setMousePos: Dispatch<SetStateAction<Point>>;
   readonly gridSize: number;
   readonly gridSubdivisions: number;
+  readonly mousePos: Point;
+  readonly setMousePos: Dispatch<SetStateAction<Point>>;
+  readonly setShowGrid: Dispatch<SetStateAction<boolean>>;
+  readonly setSnapToGrid: Dispatch<SetStateAction<boolean>>;
+  readonly setViewport: Dispatch<SetStateAction<Viewport>>;
+  readonly showGrid: boolean;
+  readonly snapToGrid: boolean;
+  readonly viewport: Viewport;
 }
 
 interface CanvasInteraction {
-  readonly screenToCanvas: (
-    screenX: number,
-    screenY: number,
-    containerRect: DOMRect,
-  ) => Point;
   readonly applySnap: (coord: number) => number;
   readonly clampZoom: (zoom: number) => number;
+  readonly screenToCanvas: (screenX: number, screenY: number, containerRect: DOMRect) => Point;
 }
 
 const CanvasContext = createContext<CanvasContextValue | undefined>(undefined);
@@ -55,23 +49,21 @@ export function CanvasProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<CanvasContextValue>(
     () => ({
-      viewport,
-      setViewport,
-      showGrid,
-      setShowGrid,
-      snapToGrid: snapToGridEnabled,
-      setSnapToGrid: setSnapToGridEnabled,
-      mousePos,
-      setMousePos,
       gridSize: GRID_SIZE,
       gridSubdivisions: GRID_SUBDIVISIONS,
+      mousePos,
+      setMousePos,
+      setShowGrid,
+      setSnapToGrid: setSnapToGridEnabled,
+      setViewport,
+      showGrid,
+      snapToGrid: snapToGridEnabled,
+      viewport,
     }),
     [viewport, showGrid, snapToGridEnabled, mousePos],
   );
 
-  return (
-    <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>
-  );
+  return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
 }
 
 export function useCanvas(): CanvasContextValue & CanvasInteraction {
@@ -80,8 +72,7 @@ export function useCanvas(): CanvasContextValue & CanvasInteraction {
     throw new Error("useCanvas must be used within CanvasProvider");
   }
 
-  const { viewport, snapToGrid: snapEnabled, gridSize, gridSubdivisions } =
-    context;
+  const { gridSize, gridSubdivisions, snapToGrid: snapEnabled, viewport } = context;
 
   const screenToCanvasCoords = useCallback(
     (screenX: number, screenY: number, containerRect: DOMRect) =>
@@ -90,20 +81,16 @@ export function useCanvas(): CanvasContextValue & CanvasInteraction {
   );
 
   const applySnap = useCallback(
-    (coord: number) =>
-      snapToGrid(coord, gridSize, gridSubdivisions, snapEnabled),
+    (coord: number) => snapToGrid(coord, gridSize, gridSubdivisions, snapEnabled),
     [snapEnabled, gridSize, gridSubdivisions],
   );
 
-  const clampZoom = useCallback(
-    (zoom: number) => Math.min(Math.max(zoom, ZOOM_MIN), ZOOM_MAX),
-    [],
-  );
+  const clampZoom = useCallback((zoom: number) => Math.min(Math.max(zoom, ZOOM_MIN), ZOOM_MAX), []);
 
   return {
     ...context,
-    screenToCanvas: screenToCanvasCoords,
     applySnap,
     clampZoom,
+    screenToCanvas: screenToCanvasCoords,
   };
 }

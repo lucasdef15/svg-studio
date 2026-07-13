@@ -1,3 +1,4 @@
+// eslint-disable-next-line import-x/no-unresolved
 import { useCanvas } from "../../hooks/useCanvasContext";
 
 export function CoordinateDisplay() {
