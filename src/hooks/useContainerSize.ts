@@ -12,7 +12,9 @@ export function useContainerSize(
     const element = ref.current;
     if (!element) return;
 
-    const observer = new ResizeObserver(([entry]) => {
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
       const { width, height } = entry.contentRect;
       setSize({ width, height });
     });
