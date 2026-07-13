@@ -14,7 +14,12 @@ import { ZOOM_WHEEL_SPEED } from "../../constants/canvas";
 import { useCanvas } from "../../hooks/useCanvasContext";
 import { useContainerSize } from "../../hooks/useContainerSize";
 import { useSpaceKey } from "../../hooks/useSpaceKey";
-import { useSvgElement } from "../../hooks/useSvgElement";
+import {
+  type CircleElement,
+  type EllipseElement,
+  type RectElement,
+  useSvgElement,
+} from "../../hooks/useSvgElement";
 import { CoordinateDisplay } from "./CoordinateDisplay";
 import { Crosshair } from "./Crosshair";
 import { Grid } from "./Grid";
@@ -25,16 +30,15 @@ interface CanvasViewportProps {
   readonly children: ReactNode;
 }
 
+type CircleResizeInitial = Pick<CircleElement, "cx" | "cy" | "r">;
+type EllipseResizeInitial = Pick<EllipseElement, "cx" | "cy" | "rx" | "ry">;
 type InteractionMode = "dragging" | "idle" | "panning" | "resizing";
+
+type ResizeInitial = Pick<RectElement, "height" | "width" | "x" | "y">;
 
 interface ResizeState {
   readonly handle: ResizeHandleId;
-  readonly initial: {
-    readonly height: number;
-    readonly width: number;
-    readonly x: number;
-    readonly y: number;
-  };
+  readonly initial: CircleResizeInitial | EllipseResizeInitial | ResizeInitial;
   readonly startCanvas: Point;
 }
 
@@ -247,19 +251,45 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
    * o MouseMove para calcular o novo tamanho.
    */
   const handleResizeStart = (handle: ResizeHandleId, event: MouseEvent<SVGRectElement>) => {
-    if (element.type !== "rect") return;
+    if (element.type === "rect") {
+      setResizeState({
+        handle,
+        initial: {
+          height: element.height,
+          width: element.width,
+          x: element.x,
+          y: element.y,
+        },
+        startCanvas: getCanvasPoint(event),
+      });
+    }
+
+    if (element.type === "circle") {
+      setResizeState({
+        handle,
+        initial: {
+          cx: element.cx,
+          cy: element.cy,
+          r: element.r,
+        },
+        startCanvas: getCanvasPoint(event),
+      });
+    }
+
+    if (element.type === "ellipse") {
+      setResizeState({
+        handle,
+        initial: {
+          cx: element.cx,
+          cy: element.cy,
+          rx: element.rx,
+          ry: element.ry,
+        },
+        startCanvas: getCanvasPoint(event),
+      });
+    }
 
     setMode("resizing");
-    setResizeState({
-      handle,
-      initial: {
-        height: element.height,
-        width: element.width,
-        x: element.x,
-        y: element.y,
-      },
-      startCanvas: getCanvasPoint(event),
-    });
   };
   /**
    * ============================================================================
@@ -290,6 +320,8 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
     const dy = current.y - resizeState.startCanvas.y;
     const { handle, initial } = resizeState;
 
+    if (!("width" in initial) || !("height" in initial)) return;
+
     let x = initial.x;
     let y = initial.y;
     let width = initial.width;
@@ -313,6 +345,60 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
       y: applySnap(y),
     });
   };
+  const applyCircleResize = (current: Point) => {
+    if (!resizeState) return;
+
+    const dx = current.x - resizeState.startCanvas.x;
+    const dy = current.y - resizeState.startCanvas.y;
+    const { handle, initial } = resizeState;
+
+    if (!("r" in initial)) return;
+
+    let radius = initial.r;
+
+    if (handle.includes("e")) radius = initial.r + dx;
+    if (handle.includes("w")) radius = initial.r - dx;
+
+    if (handle.includes("s")) radius = Math.max(radius, initial.r + dy);
+    if (handle.includes("n")) radius = Math.max(radius, initial.r - dy);
+
+    patch({
+      r: applySnap(Math.max(radius, 1)),
+    });
+  };
+  function applyEllipseResize(current: Point) {
+    if (!resizeState) return;
+    if (element.type !== "ellipse") return;
+
+    const dx = current.x - resizeState.startCanvas.x;
+    const dy = current.y - resizeState.startCanvas.y;
+
+    if (!("rx" in resizeState.initial) || !("ry" in resizeState.initial)) return;
+
+    let rx = resizeState.initial.rx;
+    let ry = resizeState.initial.ry;
+
+    if (resizeState.handle.includes("e")) {
+      rx += dx;
+    }
+
+    if (resizeState.handle.includes("w")) {
+      rx -= dx;
+    }
+
+    if (resizeState.handle.includes("s")) {
+      ry += dy;
+    }
+
+    if (resizeState.handle.includes("n")) {
+      ry -= dy;
+    }
+
+    patch({
+      rx: applySnap(Math.max(rx, 1)),
+      ry: applySnap(Math.max(ry, 1)),
+    });
+  }
   /**
    * ============================================================================
    * MOVE O ELEMENTO
@@ -385,7 +471,20 @@ export function CanvasViewport({ children }: CanvasViewportProps) {
     }
 
     if (mode === "resizing") {
-      applyRectResize(canvasPoint);
+      switch (element.type) {
+        case "circle":
+          applyCircleResize(canvasPoint);
+          break;
+
+        case "ellipse":
+          applyEllipseResize(canvasPoint);
+          break;
+
+        case "rect":
+          applyRectResize(canvasPoint);
+          break;
+      }
+
       return;
     }
 

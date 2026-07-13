@@ -1,0 +1,15 @@
+export const GRID_SIZE = 50;
+export const GRID_SUBDIVISIONS = 5;
+export const RULER_THICKNESS = 25;
+export const ZOOM_MIN = 0.1;
+export const ZOOM_MAX = 10;
+export const ZOOM_WHEEL_SPEED = 0.001;
+export const HANDLE_SIZE = 8;
+export const HANDLE_OFFSET = 4;
+export const SELECTION_COLOR = "#38BDF8";
+export const SELECTION_STROKE_DASH = "4 2";
+export const CROSSHAIR_STROKE_DASH = "5 5";
+export const GRID_MAJOR_STROKE = "#1e293b";
+export const GRID_MINOR_STROKE = "#1e293b";
+export const RULER_STROKE = "#94A3B8";
+export const CROSSHAIR_STROKE = "#334155";
